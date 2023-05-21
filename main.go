@@ -23,6 +23,20 @@ func main() {
 
 	s := NewStreamer()
 
+	t, err := NewTracker("0.0.0.0:9000")
+	fmt.Println("Starting tracker listener at: 0.0.0.0:9000")
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	go func() {
+		for {
+			data := <-t.DataChannel()
+			log.Println(data)
+		}
+	}()
+
 	go func() {
 		for {
 			time.Sleep(500 * time.Millisecond)
