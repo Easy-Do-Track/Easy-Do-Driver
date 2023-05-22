@@ -1,9 +1,12 @@
 package main
 
 import (
+	"bytes"
+	"encoding/binary"
 	"fmt"
 	"log"
 	"net"
+	"unsafe"
 )
 
 const (
@@ -25,6 +28,13 @@ type Vector3 struct {
 	Z float64 `json:"z"`
 }
 
+type Quaternion struct {
+	W float32
+	X float32
+	Y float32
+	Z float32
+}
+
 type Tracker struct {
 	conn net.PacketConn
 	data chan map[string]Vector3
@@ -39,20 +49,27 @@ func NewTracker(addr string) (Tracker, error) {
 
 	t := Tracker{conn: conn}
 
-	go t.readJSON()
+	go t.readPump()
 
 	return t, nil
 }
 
-func (t Tracker) readJSON() {
+func (t Tracker) readPump() {
 	for {
-		//data := make(map[string]Vector3)
-		resp := make([]byte, 512)
-		n, _, err := t.conn.ReadFrom(resp)
+		var data [16]Quaternion
+
+		resp := make([]byte, unsafe.Sizeof(data))
+
+		_, _, err := t.conn.ReadFrom(resp)
 		if err != nil {
 			log.Println(err)
 		}
-		fmt.Println(string(resp[:n]))
+
+		if err = binary.Read(bytes.NewReader(resp), binary.LittleEndian, &data); err != nil {
+			log.Println(err)
+		}
+
+		fmt.Println(data)
 	}
 }
 
