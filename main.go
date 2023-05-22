@@ -18,13 +18,18 @@ type values struct {
 }
 
 func main() {
+	conf, err := ConfigFromFile("config.toml")
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	r := mux.NewRouter()
 	corsMw := mux.CORSMethodMiddleware(r)
 
 	s := NewStreamer()
 
-	t, err := NewTracker("0.0.0.0:9000")
-	fmt.Println("Starting tracker listener at: 0.0.0.0:9000")
+	t, err := NewTracker(conf.Tracker.Address)
+	fmt.Println("Starting tracker listener at", conf.Tracker.Address)
 
 	if err != nil {
 		log.Fatal(err)
@@ -66,8 +71,8 @@ func main() {
 	originsOk := handlers.AllowedOrigins([]string{"*"})
 	methodsOk := handlers.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT", "OPTIONS"})
 
-	fmt.Println("Starting server at localhost:8080")
-	if err := http.ListenAndServe("localhost:8080",
+	fmt.Println("Starting server at", conf.Server.Address)
+	if err := http.ListenAndServe(conf.Server.Address,
 		handlers.CORS(headersOk, originsOk, methodsOk)(r)); err != nil {
 		log.Fatal(err)
 	}
