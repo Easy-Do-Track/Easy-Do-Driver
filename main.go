@@ -7,8 +7,7 @@ import (
 	"github.com/gorilla/mux"
 	"log"
 	"net/http"
-	"os"
-	"time"
+	"strconv"
 )
 
 type values struct {
@@ -37,19 +36,26 @@ func main() {
 
 	go func() {
 		for {
-			data := <-t.DataChannel()
-			log.Println(data)
-		}
-	}()
+			data := <-t.data
 
-	go func() {
-		for {
-			time.Sleep(500 * time.Millisecond)
-			data, err := os.ReadFile("tracker.json")
-			if err != nil {
-				log.Fatal(err)
+			result := make(map[string]Euler)
+			for k, v := range conf.Tracker.Mappings {
+				id, err := strconv.Atoi(k)
+				if err != nil {
+					log.Fatal(err)
+				}
+
+				result[v] = quaternionToEuler(data[id], "XYZ")
 			}
-			s.Broadcast(data)
+
+			j, err := json.Marshal(result)
+			if err != nil {
+				log.Println(err)
+			}
+
+			fmt.Println(string(j))
+
+			s.Broadcast(j)
 		}
 	}()
 

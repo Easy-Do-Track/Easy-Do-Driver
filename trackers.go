@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"encoding/binary"
-	"fmt"
 	"log"
 	"net"
 	"unsafe"
@@ -22,10 +21,10 @@ const (
 	KeyAnkleRight = "ankle_right"
 )
 
-type Vector3 struct {
-	X float64 `json:"x"`
-	Y float64 `json:"y"`
-	Z float64 `json:"z"`
+type Euler struct {
+	X float32 `json:"x"`
+	Y float32 `json:"y"`
+	Z float32 `json:"z"`
 }
 
 type Quaternion struct {
@@ -37,7 +36,7 @@ type Quaternion struct {
 
 type Tracker struct {
 	conn net.PacketConn
-	data chan map[string]Vector3
+	data chan [16]Quaternion
 }
 
 func NewTracker(addr string) (Tracker, error) {
@@ -48,6 +47,7 @@ func NewTracker(addr string) (Tracker, error) {
 	}
 
 	t := Tracker{conn: conn}
+	t.data = make(chan [16]Quaternion, 1)
 
 	go t.readPump()
 
@@ -69,10 +69,10 @@ func (t Tracker) readPump() {
 			log.Println(err)
 		}
 
-		fmt.Println(data)
+		t.data <- data
 	}
 }
 
-func (t Tracker) DataChannel() <-chan map[string]Vector3 {
+func (t Tracker) DataChannel() <-chan [16]Quaternion {
 	return t.data
 }
