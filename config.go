@@ -13,9 +13,16 @@ type ServerConfig struct {
 	Address string `toml:"address"`
 }
 
+type Mapping struct {
+	Name     string `toml:"name"`
+	Rotation string `toml:"rotation"`
+	Offset   Euler  `toml:"offset"`
+	Multi    Euler  `toml:"multi"`
+}
+
 type TrackerConfig struct {
-	Address  string            `toml:"address"`
-	Mappings map[string]string `toml:"mappings"`
+	Address  string             `toml:"address"`
+	Mappings map[string]Mapping `toml:"mappings"`
 }
 
 func ConfigFromFile(filename string) (Config, error) {

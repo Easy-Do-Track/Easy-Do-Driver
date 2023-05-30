@@ -38,6 +38,25 @@ func main() {
 		for {
 			data := <-t.data
 
+			// 머리
+			data[2] = multiplyQuaternion(inverseQuaternion(data[0]), data[2])
+
+			// 왼쪽 팔
+			data[3] = multiplyQuaternion(inverseQuaternion(data[1]), data[3])
+			data[1] = multiplyQuaternion(inverseQuaternion(data[0]), data[1])
+
+			// 오른쪽 팔
+			data[7] = multiplyQuaternion(inverseQuaternion(data[6]), data[7])
+			data[6] = multiplyQuaternion(inverseQuaternion(data[0]), data[6])
+
+			// 왼쪽 다리
+			data[5] = multiplyQuaternion(inverseQuaternion(data[4]), data[5])
+			//data[4] = multiplyQuaternion(inverseQuaternion(data[0]), data[4])
+
+			// 오른쪽 다리
+			data[9] = multiplyQuaternion(inverseQuaternion(data[8]), data[9])
+			//data[8] = multiplyQuaternion(inverseQuaternion(data[0]), data[8])
+
 			result := make(map[string]Euler)
 			for k, v := range conf.Tracker.Mappings {
 				id, err := strconv.Atoi(k)
@@ -45,7 +64,54 @@ func main() {
 					log.Fatal(err)
 				}
 
-				result[v] = quaternionToEuler(data[id], "XYZ")
+				temp := quaternionToEuler(data[id], "XYZ")
+
+				if v.Multi.X != 0 {
+					temp.X *= v.Multi.X
+				}
+
+				if v.Multi.Y != 0 {
+					temp.Y *= v.Multi.Y
+				}
+
+				if v.Multi.Z != 0 {
+					temp.Z *= v.Multi.Z
+				}
+
+				var e Euler
+
+				switch v.Rotation[0] {
+				case 'X':
+					e.X = temp.X
+				case 'Y':
+					e.X = temp.Y
+				case 'Z':
+					e.X = temp.Z
+				}
+
+				switch v.Rotation[1] {
+				case 'X':
+					e.Y = temp.X
+				case 'Y':
+					e.Y = temp.Y
+				case 'Z':
+					e.Y = temp.Z
+				}
+
+				switch v.Rotation[2] {
+				case 'X':
+					e.Z = temp.X
+				case 'Y':
+					e.Z = temp.Y
+				case 'Z':
+					e.Z = temp.Z
+				}
+
+				e.X += v.Offset.X
+				e.Y += v.Offset.Y
+				e.Z += v.Offset.Z
+
+				result[v.Name] = e
 			}
 
 			j, err := json.Marshal(result)

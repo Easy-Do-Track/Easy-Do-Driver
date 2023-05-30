@@ -5,19 +5,77 @@ address = "localhost:8080"
 address = "0.0.0.0:9000"
 
 [tracker.mappings]
-0 = ""
-1 = ""
-2 = ""
-3 = ""
-4 = ""
-5 = ""
-6 = ""
-7 = ""
-8 = ""
-9 = ""
-10 = ""
-11 = ""
-12 = ""
-13 = ""
-14 = ""
-15 = ""
+
+[tracker.mappings.0]
+name = "上半身" #가슴
+rotation = "YZX"
+[tracker.mappings.0.multi]
+Y = -1
+Z = -1
+
+[tracker.mappings.6]
+name = "左腕" #왼쪽 윗팔
+rotation = "XZY"
+[tracker.mappings.6.offset]
+Z = 0.7
+[tracker.mappings.6.multi]
+X = -1
+Y = -1
+Z = -1
+
+[tracker.mappings.2]
+name = "首" #머리
+rotation = "YZX"
+[tracker.mappings.2.multi]
+X = -1
+Z = -1
+
+[tracker.mappings.7]
+name = "左ひじ" #왼쪽 아래팔
+rotation = "XZY"
+[tracker.mappings.7.multi]
+X = -1
+Y = -1
+Z = -1
+
+[tracker.mappings.4]
+name = "右足" #오른쪽 윗다리
+rotation = "XZY"
+[tracker.mappings.4.multi]
+X = -1
+Y = -1
+Z = -1
+
+[tracker.mappings.5]
+name = "右ひざ" #오른쪽 아랫다리
+rotation = "XZY"
+[tracker.mappings.5.multi]
+X = -1
+Y = -1
+Z = -1
+
+[tracker.mappings.1]
+name = "右腕" #오른쪽 윗팔
+rotation = "XZY"
+[tracker.mappings.1.offset]
+Z = -0.7
+[tracker.mappings.1.multi]
+Z = -1
+
+[tracker.mappings.3]
+name = "右ひじ" #오른쪽 아래팔
+rotation = "XZY"
+[tracker.mappings.3.multi]
+Z = -1
+
+[tracker.mappings.8]
+name = "左足" #왼쪽 윗다리
+rotation = "XZY"
+[tracker.mappings.8.multi]
+Z = -1
+
+[tracker.mappings.9]
+name = "左ひざ" #왼쪽 아랫다리
+rotation = "XZY"
+[tracker.mappings.9.multi]
+Z = -1
