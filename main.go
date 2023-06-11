@@ -6,6 +6,7 @@ import (
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	"log"
+	"net"
 	"net/http"
 	"strconv"
 )
@@ -27,7 +28,10 @@ func main() {
 
 	s := NewStreamer()
 
-	t, err := NewTracker(conf.Tracker.Address)
+	stat := &Status{}
+
+	t, err := NewTracker(conf.Tracker.Address, stat)
+
 	fmt.Println("Starting tracker listener at", conf.Tracker.Address)
 
 	if err != nil {
@@ -51,11 +55,9 @@ func main() {
 
 			// 왼쪽 다리
 			data[5] = multiplyQuaternion(inverseQuaternion(data[4]), data[5])
-			//data[4] = multiplyQuaternion(inverseQuaternion(data[0]), data[4])
 
 			// 오른쪽 다리
 			data[9] = multiplyQuaternion(inverseQuaternion(data[8]), data[9])
-			//data[8] = multiplyQuaternion(inverseQuaternion(data[0]), data[8])
 
 			result := make(map[string]Euler)
 			for k, v := range conf.Tracker.Mappings {
@@ -119,7 +121,7 @@ func main() {
 				log.Println(err)
 			}
 
-			fmt.Println(string(j))
+			//fmt.Println(string(j))
 
 			s.Broadcast(j)
 		}
@@ -127,21 +129,23 @@ func main() {
 
 	r.Handle("/stream", s)
 
-	r.HandleFunc("/profile", func(res http.ResponseWriter, req *http.Request) {
-		var result values
-		if err := json.NewDecoder(req.Body).Decode(&result); err != nil {
-			log.Println(err)
-			res.Write([]byte(`"result": "error"`))
-			return
-		}
-		fmt.Println(result)
-		res.Write([]byte(`{"result":"ok"}`))
-	})
+	r.Handle("/status", stat)
+
 	r.Use(corsMw)
 
 	headersOk := handlers.AllowedHeaders([]string{"X-Requested-With", "Content-Type", "Authorization"})
 	originsOk := handlers.AllowedOrigins([]string{"*"})
 	methodsOk := handlers.AllowedMethods([]string{"GET", "HEAD", "POST", "PUT", "OPTIONS"})
+
+	ips, err := net.InterfaceAddrs()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println("Your IPs:")
+	for _, i := range ips {
+		fmt.Println(i, i.Network())
+	}
 
 	fmt.Println("Starting server at", conf.Server.Address)
 	if err := http.ListenAndServe(conf.Server.Address,
